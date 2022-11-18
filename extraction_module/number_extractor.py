@@ -283,47 +283,47 @@ class NumberExtractor():
         if self.use_translate==True:
             output_dict["translate"] = float(self.extract_by_translate(text))
 
-        print(output_dict)
+        # print(output_dict)
         return self.final_combining_fn(output_dict)
 
         # return (number_1,number_2,number_3)
 
 
-from fairseq import checkpoint_utils, distributed_utils, options, tasks, utils
-import sys
-sys.path.append("/home/jatin/indic_lib")
-sys.path.append("/home/jatin/indic_lib/indicTrans")
-from indicTrans.inference.engine import Model
-import indicnlp
-indic2en_model = Model(expdir='/home/jatin/indic_lib/indic-en')
+# from fairseq import checkpoint_utils, distributed_utils, options, tasks, utils
+# import sys
+# sys.path.append("/home/jatin/indic_lib")
+# sys.path.append("/home/jatin/indic_lib/indicTrans")
+# from indicTrans.inference.engine import Model
+# import indicnlp
+# indic2en_model = Model(expdir='/home/jatin/indic_lib/indic-en')
 
-normalizer = indicnlp.normalize.indic_normalize.DevanagariNormalizer()
+# normalizer = indicnlp.normalize.indic_normalize.DevanagariNormalizer()
 
-extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/cotton_ace/configs/num_ext.json",normalizer=normalizer,use_translate=False)
-# extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/cotton_ace/configs/num_ext.json",normalizer=normalizer,use_translate=True,translation_model=indic2en_model)
-examples = [
-    "सौ एकर जमीन है",
-    "पाँच सौ एकर जमीन है",
-    "पांचसौ एकर जमीन है",
-    "पाँच सौ सात एकर जमीन है",
-    "देढ़ एकर जमीन है",
-    "एक दशमलव तीन एकर जमीन है",
-    "501 एकर जमीन है",
-    "आधा एकर जमीन है",
-    "देढ़ एकर जमीन है",
-    "देड़ एकर",
-    "साढ़े छः एकड़ जमीन",
-    "मेरे पास साढ़े दस एकड़ जमीन है",
-    "निश्लसेलिशन चार सौ छः एकर जमीन है",
-    "दो हज़ार पाँच सौ तीस"
-]
-numbers = []
-for example in examples:
-    numbers.append(extractor_obj.extract_number(example))
+# extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/cotton_ace/configs/num_ext.json",normalizer=normalizer,use_translate=False)
+# # extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/cotton_ace/configs/num_ext.json",normalizer=normalizer,use_translate=True,translation_model=indic2en_model)
+# examples = [
+#     "सौ एकर जमीन है",
+#     "पाँच सौ एकर जमीन है",
+#     "पांचसौ एकर जमीन है",
+#     "पाँच सौ सात एकर जमीन है",
+#     "देढ़ एकर जमीन है",
+#     "एक दशमलव तीन एकर जमीन है",
+#     "501 एकर जमीन है",
+#     "आधा एकर जमीन है",
+#     "देढ़ एकर जमीन है",
+#     "देड़ एकर",
+#     "साढ़े छः एकड़ जमीन",
+#     "मेरे पास साढ़े दस एकड़ जमीन है",
+#     "निश्लसेलिशन चार सौ छः एकर जमीन है",
+#     "दो हज़ार पाँच सौ तीस"
+# ]
+# numbers = []
+# for example in examples:
+#     numbers.append(extractor_obj.extract_number(example))
 
-print(numbers)
+# print(numbers)
 
-## सौ and सो
-## साड़े and साढ़े
+# ## सौ and सो
+# ## साड़े and साढ़े
 
     
