@@ -1,6 +1,7 @@
 # Word to Number for Hindi
  
-This is a Python module to convert number words (eg. twenty one) to numeric digits (21). It works for positive numbers upto the range of 999,999,999,999 (i.e. billions)
+This is a Python module to convert number words (eg. मेरे पास पाँच सौ तीस एकर जमीन है) to numeric digits (530). It works for positive numbers upto the range of 10000, it can be easily extended to work for much larger range.
+
 This library works in two modes:
 - Translation
 - Without Translation
@@ -22,6 +23,27 @@ Examples:
 
 ```
 ## Implementation Details
+
+![Overall Workflow](/imgs/sentence_to_number.jpeg)
+
 To read more about how this was implemented, you can read this [blog](https://docs.google.com/document/d/14RPJ9xrvaM-ct5Q6VkYqRP0hagHSr1zkGvNKo1Q8XOQ/edit?usp=sharing)
 
 Below is the installation, usage and other details of this module.
+
+## Tutorial on Installation
+Colab Notebook Tutorial: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1vjD0-SpdWN9maOWEUkPnKGFtMxps6Hcl?usp=sharing)
+
+## Usage
+```
+from number_extractor.extraction_module.number_extractor import NumberExtractor
+```
+
+```
+extractor_obj = NumberExtractor("hi","/content/number_extractor/configs/num_ext.json")
+```
+
+```
+s = "सौ एकर जमीन है"
+extractor_obj.master_extract_fn(indic2en_model,normalizer,s)
+```
+
