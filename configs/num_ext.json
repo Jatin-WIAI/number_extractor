@@ -1,0 +1,8 @@
+{
+    "hi":{
+        "wh_num_dict_file": "/home/jatin/huggingface_demo/cotton_ace/util_data/hi_wh_num_dict.json",
+        "frac_key_dict_file": "/home/jatin/huggingface_demo/cotton_ace/util_data/hi_frac_keywords.json",
+        "deci_key_dict_file": "/home/jatin/huggingface_demo/cotton_ace/util_data/hi_deci_keywords.json",
+        "en_num_dict_file": "/home/jatin/huggingface_demo/cotton_ace/util_data/en_keywords.json"
+    }
+}
