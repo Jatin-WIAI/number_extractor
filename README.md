@@ -33,17 +33,4 @@ Below is the installation, usage and other details of this module.
 ## Tutorial on Installation
 Colab Notebook Tutorial: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1vjD0-SpdWN9maOWEUkPnKGFtMxps6Hcl?usp=sharing)
 
-## Usage
-```
-from number_extractor.extraction_module.number_extractor import NumberExtractor
-```
-
-```
-extractor_obj = NumberExtractor("hi","/content/number_extractor/configs/num_ext.json")
-```
-
-```
-s = "सौ एकर जमीन है"
-extractor_obj.master_extract_fn(indic2en_model,normalizer,s)
-```
 
