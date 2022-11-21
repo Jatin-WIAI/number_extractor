@@ -45,7 +45,21 @@ class NumberExtractor():
         self.model = translation_model
         self.normalizer = normalizer
         self.use_translate = use_translate
+        self.do_deaccentification = self.config["deaccentification"]
+        if self.do_deaccentification:
+            self.accents_list = read_json(self.config["accent_file"])[lang]
 
+    def perfrom_deaccentification(self,text):
+        """Remove accents from the input text.
+
+        Args:
+            text (_type_): Input string
+
+        Returns:
+            _type_: text with accents removed.
+        """
+        text = replace_all(text,self.accents_list,"")
+        return text
 
     def translate(self,text):
         """Translate text to english.
@@ -274,8 +288,7 @@ class NumberExtractor():
             else:
                 return max(output_dict["spot"],output_dict["replace"])
 
-
-    def extract_number(self,text):
+    def extract_number_main(self,text):
         text = self.normalize_text(" "+text+" ")
         output_dict = {}
         output_dict["spot"] = float(self.extract_by_og_lang_spot(text))
@@ -283,8 +296,19 @@ class NumberExtractor():
         if self.use_translate==True:
             output_dict["translate"] = float(self.extract_by_translate(text))
 
-        # print(output_dict)
-        return self.final_combining_fn(output_dict)
+        print(output_dict)
+        output = self.final_combining_fn(output_dict)
+        return output
+
+    def extract_number(self,text):
+        output = self.extract_number_main(text)
+        if self.do_deaccentification:
+            text = self.perfrom_deaccentification(text)
+            print(text)
+            output_2 = self.extract_number_main(text)
+            ouptut =  max(output,output_2)
+
+        return ouptut
 
         # return (number_1,number_2,number_3)
 
@@ -299,8 +323,8 @@ class NumberExtractor():
 
 # normalizer = indicnlp.normalize.indic_normalize.DevanagariNormalizer()
 
-# extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/cotton_ace/configs/num_ext.json",normalizer=normalizer,use_translate=False)
-# # extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/cotton_ace/configs/num_ext.json",normalizer=normalizer,use_translate=True,translation_model=indic2en_model)
+# # extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False)
+# extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=True,translation_model=indic2en_model)
 # examples = [
 #     "सौ एकर जमीन है",
 #     "पाँच सौ एकर जमीन है",
@@ -315,7 +339,8 @@ class NumberExtractor():
 #     "साढ़े छः एकड़ जमीन",
 #     "मेरे पास साढ़े दस एकड़ जमीन है",
 #     "निश्लसेलिशन चार सौ छः एकर जमीन है",
-#     "दो हज़ार पाँच सौ तीस"
+#     "दो हज़ार पाँच सौ तीस",
+#     "पाँच सौ सैतालीस एकर जमीन है"
 # ]
 # numbers = []
 # for example in examples:

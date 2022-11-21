@@ -3,6 +3,8 @@
         "wh_num_dict_file": "util_data/hi_wh_num_dict_deacentifined.json",
         "frac_key_dict_file": "util_data/hi_frac_keywords_deacentifined.json",
         "deci_key_dict_file": "util_data/hi_deci_keywords_deacentifined.json",
-        "en_num_dict_file": "util_data/en_keywords.json"
+        "en_num_dict_file": "util_data/en_keywords.json",
+        "accent_file": "util_data/accents_list.json",
+        "deaccentification": true
     }
 }
