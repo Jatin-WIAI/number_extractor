@@ -296,7 +296,7 @@ class NumberExtractor():
         if self.use_translate==True:
             output_dict["translate"] = float(self.extract_by_translate(text))
 
-        print(output_dict)
+        # print(output_dict)
         output = self.final_combining_fn(output_dict)
         return output
 
