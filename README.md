@@ -1,6 +1,6 @@
 # Word to Number for Hindi
  
-This is a Python module to convert number words (eg. मेरे पास पाँच सौ तीस एकर जमीन है) to numeric digits (530). It works for positive numbers upto the range of 10000, it can be easily extended to work for much larger range.
+This is a Python module to convert number words (eg. मेरे पास पाँच सौ तीस एकर जमीन है) to numeric digits (530). It works for positive numbers upto the range of 100000, it can be easily extended to work for much larger range. It also supports fractions and decimals with one decimal place. 
 
 This library works in two modes:
 - Translation
@@ -33,17 +33,4 @@ Below is the installation, usage and other details of this module.
 ## Tutorial on Installation
 Colab Notebook Tutorial: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1vjD0-SpdWN9maOWEUkPnKGFtMxps6Hcl?usp=sharing)
 
-## Usage
-```
-from number_extractor.extraction_module.number_extractor import NumberExtractor
-```
-
-```
-extractor_obj = NumberExtractor("hi","/content/number_extractor/configs/num_ext.json")
-```
-
-```
-s = "सौ एकर जमीन है"
-extractor_obj.master_extract_fn(indic2en_model,normalizer,s)
-```
 
