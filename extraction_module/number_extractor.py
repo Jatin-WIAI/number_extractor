@@ -35,7 +35,7 @@ class NumberExtractor():
     """
     The Class which extracts number from a text
     """
-    def __init__(self,lang, config_file, normalizer = None,use_translate=True, translation_model=None) -> None:
+    def __init__(self,lang, config_file, normalizer = None,use_translate=True, translation_model=None,debug=False) -> None:
         self.lang = lang
         self.config = read_json(config_file)[lang]
         self.wh_num_dict = read_json(self.config["wh_num_dict_file"])
@@ -47,7 +47,8 @@ class NumberExtractor():
         self.use_translate = use_translate
         self.do_deaccentification = self.config["deaccentification"]
         if self.do_deaccentification:
-            self.accents_list = read_json(self.config["accent_file"])[lang]
+            self.accents_dict = read_json(self.config["accent_file"])[lang]
+        self.debug = debug
 
     def perfrom_deaccentification(self,text):
         """Remove accents from the input text.
@@ -58,7 +59,8 @@ class NumberExtractor():
         Returns:
             _type_: text with accents removed.
         """
-        text = replace_all(text,self.accents_list,"")
+        for k,v in self.accents_dict.items():
+            text = text.replace(k,v)
         return text
 
     def translate(self,text):
@@ -249,7 +251,8 @@ class NumberExtractor():
 
         trans_text = self.translate(text).replace("1 / 2","one and half") 
         trans_text = self.normalize_text(trans_text)
-        # print(trans_text)
+        if self.debug:
+            print(trans_text)
         output_dict = {}
         output_dict["numerics"] = self.extract_numerics_from_string(trans_text)
         output_dict["w2n"] = self.extract_by_w2n(trans_text)
@@ -295,8 +298,8 @@ class NumberExtractor():
         output_dict["replace"] = float(self.extract_by_replace(text))
         if self.use_translate==True:
             output_dict["translate"] = float(self.extract_by_translate(text))
-
-        # print(output_dict)
+        if self.debug:
+            print(output_dict)
         output = self.final_combining_fn(output_dict)
         return output
 
@@ -313,43 +316,46 @@ class NumberExtractor():
         # return (number_1,number_2,number_3)
 
 
-# from fairseq import checkpoint_utils, distributed_utils, options, tasks, utils
-# import sys
-# sys.path.append("/home/jatin/indic_lib")
-# sys.path.append("/home/jatin/indic_lib/indicTrans")
-# from indicTrans.inference.engine import Model
-# import indicnlp
-# indic2en_model = Model(expdir='/home/jatin/indic_lib/indic-en')
+if __name__ == "__main__":
+    from fairseq import checkpoint_utils, distributed_utils, options, tasks, utils
+    import sys
+    sys.path.append("/home/jatin/indic_lib")
+    sys.path.append("/home/jatin/indic_lib/indicTrans")
+    from indicTrans.inference.engine import Model
+    import indicnlp
+    indic2en_model = Model(expdir='/home/jatin/indic_lib/indic-en')
 
-# normalizer = indicnlp.normalize.indic_normalize.DevanagariNormalizer()
+    normalizer = indicnlp.normalize.indic_normalize.DevanagariNormalizer()
 
-# # extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False)
-# extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=True,translation_model=indic2en_model)
-# examples = [
-#     "सौ एकर जमीन है",
-#     "पाँच सौ एकर जमीन है",
-#     "पांचसौ एकर जमीन है",
-#     "पाँच सौ सात एकर जमीन है",
-#     "देढ़ एकर जमीन है",
-#     "एक दशमलव तीन एकर जमीन है",
-#     "501 एकर जमीन है",
-#     "आधा एकर जमीन है",
-#     "देढ़ एकर जमीन है",
-#     "देड़ एकर",
-#     "साढ़े छः एकड़ जमीन",
-#     "मेरे पास साढ़े दस एकड़ जमीन है",
-#     "निश्लसेलिशन चार सौ छः एकर जमीन है",
-#     "दो हज़ार पाँच सौ तीस",
-#     "पाँच सौ सैतालीस एकर जमीन है",
-#     "मेरे पास पात सौ तीस एकर जमीन है"
-# ]
-# numbers = []
-# for example in examples:
-#     numbers.append(extractor_obj.extract_number(example))
+    # extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False)
+    extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=True,translation_model=indic2en_model,debug=True)
+    examples = [
+        "सौ एकर जमीन है",
+        "पाँच सौ एकर जमीन है",
+        "पांचसौ एकर जमीन है",
+        "पाँच सौ सात एकर जमीन है",
+        "देढ़ एकर जमीन है",
+        "एक दशमलव तीन एकर जमीन है",
+        "501 एकर जमीन है",
+        "आधा एकर जमीन है",
+        "देढ़ एकर जमीन है",
+        "देड़ एकर",
+        "साढ़े छः एकड़ जमीन",
+        "मेरे पास साढ़े दस एकड़ जमीन है",
+        "निश्लसेलिशन चार सौ छः एकर जमीन है",
+        "दो हज़ार पाँच सौ तीस",
+        "पाँच सौ सैतालीस एकर जमीन है",
+        "मेरे पास पात सौ तीस एकर जमीन है",
+        "तिरपन",
+        "सैंतालिस"
+    ]
+    numbers = []
+    for example in examples:
+        numbers.append(extractor_obj.extract_number(example))
 
-# print(numbers)
+    print(numbers)
 
-# ## सौ and सो
-# ## साड़े and साढ़े
+    ## सौ and सो
+    ## साड़े and साढ़े
 
     
