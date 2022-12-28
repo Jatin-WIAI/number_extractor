@@ -292,6 +292,7 @@ class NumberExtractor():
                 return max(output_dict["spot"],output_dict["replace"])
 
     def extract_number_main(self,text):
+        text = text.lstrip().rstrip()
         text = self.normalize_text(" "+text+" ")
         output_dict = {}
         output_dict["spot"] = float(self.extract_by_og_lang_spot(text))
@@ -347,7 +348,8 @@ if __name__ == "__main__":
         "पाँच सौ सैतालीस एकर जमीन है",
         "मेरे पास पात सौ तीस एकर जमीन है",
         "तिरपन",
-        "सैंतालिस"
+        "सैंतालिस",
+        "दो हज़ार पाँच सौ त्रेपन"
     ]
     numbers = []
     for example in examples:
