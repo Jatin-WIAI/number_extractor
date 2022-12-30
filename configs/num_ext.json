@@ -6,5 +6,13 @@
         "en_num_dict_file": "util_data/en_keywords.json",
         "accent_file": "util_data/accents_list.json",
         "deaccentification": true
+    },
+    "mr":{
+        "wh_num_dict_file": "util_data/mr_wh_num_dict_deaccentified.json",
+        "frac_key_dict_file": "util_data/mr_frac_dict_deaccentified.json",
+        "deci_key_dict_file": "util_data/en_to_mr_dict_deaccentified.json",
+        "en_num_dict_file": "util_data/en_keywords.json",
+        "accent_file": "util_data/accents_list.json",
+        "deaccentification": true
     }
 }
