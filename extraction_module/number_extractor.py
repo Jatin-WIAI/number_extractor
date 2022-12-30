@@ -148,6 +148,7 @@ class NumberExtractor():
         new_target = " "+target+" "
         new_keywords = [" "+key+" " for key in keywords]
         text = replace_all(text,new_keywords,new_target)
+
         return text
 
     def postprocess_en_text(self,text):
@@ -218,7 +219,8 @@ class NumberExtractor():
             text = self.replace_keywords(text,v,k)
         # print(text)
         number = self.extract_by_w2n(text)
-        
+        if self.debug:
+            print("Replaced Text: ",text)
         return number
     
     def combining_fn_for_translate(self,output_dict):
@@ -327,10 +329,11 @@ if __name__ == "__main__":
     indic2en_model = Model(expdir='/home/jatin/indic_lib/indic-en')
 
     normalizer = indicnlp.normalize.indic_normalize.DevanagariNormalizer()
-
+    lang = "mr"
     # extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False)
-    extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=True,translation_model=indic2en_model,debug=True)
-    examples = [
+    extractor_obj = NumberExtractor(lang,"/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False,translation_model=indic2en_model,debug=True)
+    examples = {
+        "hi":[
         "सौ एकर जमीन है",
         "पाँच सौ एकर जमीन है",
         "पांचसौ एकर जमीन है",
@@ -350,10 +353,34 @@ if __name__ == "__main__":
         "तिरपन",
         "सैंतालिस",
         "दो हज़ार पाँच सौ त्रेपन"
+    ],
+    "mr":[
+        "शंभर एकर जमीन",
+        "पाचशे एकर जमीन",
+        "पाचशे एकर जमीन",
+        "पाचशे सात एकर जमीन",
+        "दीड एकर जमीन",
+        "एक पूर्णांक तीन एकर जमीन",
+        "501 एकर आहे",
+        "अर्धा एकर जमीन",
+        "दीड एकर जमीन",
+        "साडे सहा एकर जमीन",
+        "माझ्याकडे साडे दहा एकर जमीन आहे",
+        "निसलेशन म्हणजे चारशे सहा एकर जमीन",
+        "दोन हजार पाचशे तीस",
+        "पाचशे चाळीस एकर जमीन",
+        "माझ्याकडे 100 आणि 30 एकर जमीन आहे",
+        "त्रेपन्न",
+        "सत्तेचाळीस",
+        "दोन हजार पाचशे त्रेपन्न"
+        
     ]
+    }
     numbers = []
-    for example in examples:
+    for example in examples[lang]:
+        print(example)
         numbers.append(extractor_obj.extract_number(example))
+        print("\n")
 
     print(numbers)
 
