@@ -322,16 +322,16 @@ class NumberExtractor():
 if __name__ == "__main__":
     from fairseq import checkpoint_utils, distributed_utils, options, tasks, utils
     import sys
-    sys.path.append("/home/jatin/indic_lib")
-    sys.path.append("/home/jatin/indic_lib/indicTrans")
+    sys.path.append("/home/jatin/")
+    sys.path.append("/home/jatin/indicTrans")
     from indicTrans.inference.engine import Model
     import indicnlp
-    indic2en_model = Model(expdir='/home/jatin/indic_lib/indic-en')
+    indic2en_model = Model(expdir='/home/jatin/indicTrans/indic-en')
 
     normalizer = indicnlp.normalize.indic_normalize.DevanagariNormalizer()
     lang = "mr"
     # extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False)
-    extractor_obj = NumberExtractor(lang,"/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False,translation_model=indic2en_model,debug=True)
+    extractor_obj = NumberExtractor(lang,"/home/jatin/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False,translation_model=indic2en_model,debug=True)
     examples = {
         "hi":[
         "सौ एकर जमीन है",
