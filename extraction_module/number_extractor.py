@@ -175,16 +175,22 @@ class NumberExtractor():
         Returns:
             float: Return maximum of all the numbers spotted.
         """
-        numbers = []
+        wh_spots = []
+        frac_spots = []
+        # numbers = []
         for k,v in self.wh_num_dict.items():
             if self.spot_keyword(text,v)==1:
-                numbers.append(float(k))
+                wh_spots.append(float(k))
         for k,v in self.frac_dict.items():
             if self.spot_keyword(text,v)==1:
-                numbers.append(float(k))
-        if len(numbers)==0:
-            return -1
-        return max(numbers)
+                frac_spots.append(float(k))
+        if len(wh_spots+frac_spots)==0:
+            return -1, None
+        max_num = float(max(wh_spots+frac_spots))
+        if max_num in frac_spots:
+            return max_num, "frac"
+        else:
+            return max_num, "whole"
     
     def extract_by_en_spot(self,text):
         """Extract number by spotting keywords in english language.
@@ -266,14 +272,15 @@ class NumberExtractor():
         # print(number_1,number_2,number_3,number_4,number_5)
         
 
-    def final_combining_fn(self,output_dict):
-        if self.use_translate==True:
-            if output_dict["spot"].is_integer()!=True:
-                if (output_dict["spot"]*10)%5==0:
-                    return output_dict["spot"]
-            if output_dict["replace"].is_integer()!=True:
-                return output_dict["replace"]
-            else:
+    def final_combining_fn(self,output_dict, spot_type):
+        """This function returns an output for multiple extraction outputs. The outputs are combined using a specific combination strategy."""
+
+        if spot_type=="frac":
+            return output_dict["spot"]
+        if output_dict["replace"].is_integer()!=True:
+            return output_dict["replace"]
+        else:
+            if self.use_translate==True:
                 if output_dict["translate"].is_integer()!=True:
                     return output_dict["translate"]
                 else:
@@ -283,27 +290,45 @@ class NumberExtractor():
                         return most_common
                     else:
                         return max(output_dict["replace"],output_dict["translate"])
-        
-        else:
-            if output_dict["spot"].is_integer()!=True:
-                if (output_dict["spot"]*10)%5==0:
-                    return output_dict["spot"]
-            if output_dict["replace"].is_integer()!=True:
-                return output_dict["replace"]
             else:
                 return max(output_dict["spot"],output_dict["replace"])
+        # if self.use_translate==True:
+        #     if output_dict["spot"].is_integer()!=True:
+        #         if (output_dict["spot"]*10)%5==0:
+        #             return output_dict["spot"]
+        #     if output_dict["replace"].is_integer()!=True:
+        #         return output_dict["replace"]
+        #     else:
+        #         if output_dict["translate"].is_integer()!=True:
+        #             return output_dict["translate"]
+        #         else:
+        #             L = [v for k,v in output_dict.items()]
+        #             most_common,num_most_common = Counter(L).most_common(1)[0]
+        #             if num_most_common>1 and most_common!=-1:
+        #                 return most_common
+        #             else:
+        #                 return max(output_dict["replace"],output_dict["translate"])
+        
+        # else:
+        #     if output_dict["spot"].is_integer()!=True:
+        #         if (output_dict["spot"]*10)%5==0:
+        #             return output_dict["spot"]
+        #     if output_dict["replace"].is_integer()!=True:
+        #         return output_dict["replace"]
+        #     else:
+        #         return max(output_dict["spot"],output_dict["replace"])
 
     def extract_number_main(self,text):
         text = text.lstrip().rstrip()
         text = self.normalize_text(" "+text+" ")
         output_dict = {}
-        output_dict["spot"] = float(self.extract_by_og_lang_spot(text))
+        output_dict["spot"], spot_type = self.extract_by_og_lang_spot(text)
         output_dict["replace"] = float(self.extract_by_replace(text))
         if self.use_translate==True:
             output_dict["translate"] = float(self.extract_by_translate(text))
         if self.debug:
             print(output_dict)
-        output = self.final_combining_fn(output_dict)
+        output = self.final_combining_fn(output_dict, spot_type)
         return output
 
     def extract_number(self,text):
@@ -329,7 +354,7 @@ if __name__ == "__main__":
     indic2en_model = Model(expdir='/home/jatin/indicTrans/indic-en')
 
     normalizer = indicnlp.normalize.indic_normalize.DevanagariNormalizer()
-    lang = "mr"
+    lang = "hi"
     # extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False)
     extractor_obj = NumberExtractor(lang,"/home/jatin/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False,translation_model=indic2en_model,debug=True)
     examples = {
@@ -352,7 +377,12 @@ if __name__ == "__main__":
         "मेरे पास पात सौ तीस एकर जमीन है",
         "तिरपन",
         "सैंतालिस",
-        "दो हज़ार पाँच सौ त्रेपन"
+        "दो हज़ार पाँच सौ त्रेपन",
+        "देढ़ सौ एकर जमीन है",
+        "साढ़े छः सौ एकड़ जमीन",
+        "ग्यारह सौ एकर जमीन है",
+        "ढाई सो एकर जमीन",
+        "ढाईसो एकर जमीन"
     ],
     "mr":[
         "शंभर एकर जमीन",
@@ -373,7 +403,6 @@ if __name__ == "__main__":
         "त्रेपन्न",
         "सत्तेचाळीस",
         "दोन हजार पाचशे त्रेपन्न"
-        
     ]
     }
     numbers = []
