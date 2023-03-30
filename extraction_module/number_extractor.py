@@ -35,7 +35,7 @@ class NumberExtractor():
     """
     The Class which extracts number from a text
     """
-    def __init__(self,lang, config_file, normalizer = None,use_translate=True, translation_model=None,debug=False) -> None:
+    def __init__(self,lang, config_file, normalizer = None,use_translate=True, translation_model=None,debug=False):
         self.lang = lang
         self.config = read_json(config_file)[lang]
         self.wh_num_dict = read_json(self.config["wh_num_dict_file"])
@@ -382,7 +382,8 @@ if __name__ == "__main__":
         "साढ़े छः सौ एकड़ जमीन",
         "ग्यारह सौ एकर जमीन है",
         "ढाई सो एकर जमीन",
-        "ढाईसो एकर जमीन"
+        "ढाईसो एकर जमीन",
+        "मेरे परिवार में कुल बारा लोग है"
     ],
     "mr":[
         "शंभर एकर जमीन",
