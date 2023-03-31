@@ -29,6 +29,15 @@ To read more about how this was implemented, you can read this [blog](https://do
 
 Below is the installation, usage and other details of this module.
 
+## Installation
+```
+git clone https://github.com/Jatin-WIAI/number_extractor.git
+```
+```
+python setup.py
+```
+
+
 ## Tutorial on Installation
 Colab Notebook Tutorial: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1vjD0-SpdWN9maOWEUkPnKGFtMxps6Hcl?usp=sharing)
 
