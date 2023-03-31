@@ -1,5 +1,9 @@
-# Word to Number for Hindi
+# Indic Text to Number Extractor
  
+Supported Languages:
+- Hindi (hi)
+- Marathi (Mr)
+
 This is a Python module to convert number words (eg. मेरे पास पाँच सौ तीस एकर जमीन है) to numeric digits (530). It works for positive numbers upto the range of 100000, it can be easily extended to work for much larger range. It also supports fractions and decimals with one decimal place. 
 
 This library works in two modes:
