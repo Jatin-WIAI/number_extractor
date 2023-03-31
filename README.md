@@ -10,7 +10,7 @@ This library works in two modes:
 - Translation
 - Without Translation
 
-Our system works well for small errors in accents even in normal mode (`without Translation`)
+Our system works well for small errors in accents even in normal mode (`without Translation`). It is much faster and lighter than the `Translation` version.
 
 The `translation` mode is the intelligent mode but little less reliable. It is capable of extracting number even from a text with some errors. Use this if you want to extract number from output of an ASR (Automatic Speech Recognition) model.
 
@@ -37,13 +37,25 @@ Below is the installation, usage and other details of this module.
 ```
 git clone https://github.com/Jatin-WIAI/number_extractor.git
 ```
+To install `Without Translation` version
 ```
 python setup.py
 ```
+
+To install `with Translation` version
+```
+python setup.py --translate yes
+```
+
 ## Usage
 ```
 from number_extractor.number_extractor import NumberExtractor
+
+# To use without translation
 ne = NumberExtractor("hi")
+
+# To use with translation
+ne = NumberExtractor(lang = "hi", use_translate = True)
 ```
 ```
 ne.extract_number("मेरे पास पाँच सौ तीस एकर जमीन है")
