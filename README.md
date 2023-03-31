@@ -6,11 +6,10 @@ This library works in two modes:
 - Translation
 - Without Translation
 
-The `translation` mode is the intelligent mode. It is capable of extracting number even from a text with some errors. Use this if you want to extract number from
-output of an ASR (Automatic Speech Recognition) model.
+Our system works well for small errors in accents even in normal mode (`without Translation`)
 
-The `Without translation` mode relies completely on strict keyword matching, hence, it is much faster than `translation mode`. But, it will fail for inputs with
-small variations or errors.
+The `translation` mode is the intelligent mode but little less reliable. It is capable of extracting number even from a text with some errors. Use this if you want to extract number from output of an ASR (Automatic Speech Recognition) model.
+
 
 We have tried to build this library in such a way that it can be used to extract numbers for other languages as well with a little effort. A guide to add
 a new language will be updated later.
