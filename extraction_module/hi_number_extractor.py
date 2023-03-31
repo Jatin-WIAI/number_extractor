@@ -5,6 +5,12 @@ from collections import Counter
 import logging
 from extraction_module.utils import read_json,replace_all, create_number_array_from_text
 import numpy as np
+import os
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+sys.path.append(SCRIPT_DIR)
+util_data_dir = os.path.join(os.path.dirname(SCRIPT_DIR),"util_data")
 
 class HINumberExtractor():
     """
@@ -15,16 +21,16 @@ class HINumberExtractor():
         assert lang in self.supported_languages, "Language not supported"
         self.lang = lang
         self.config = read_json(config_file)[lang]
-        self.wh_num_dict = read_json(self.config["wh_num_dict_file"])
-        self.frac_dict =  read_json(self.config["frac_key_dict_file"])
-        self.num_word_dict = read_json(self.config["num_word_dict_file"])
-        self.en_num_dict = read_json(self.config["en_num_dict_file"])
+        self.wh_num_dict = read_json(os.path.join(util_data_dir,self.config["wh_num_dict_file"]))
+        self.frac_dict =  read_json(os.path.join(util_data_dir,self.config["frac_key_dict_file"]))
+        self.num_word_dict = read_json(os.path.join(util_data_dir,self.config["num_word_dict_file"]))
+        self.en_num_dict = read_json(os.path.join(util_data_dir,self.config["en_num_dict_file"]))
         self.model = translation_model
         self.normalizer = normalizer
         self.use_translate = use_translate
         self.do_deaccentification = self.config["deaccentification"]
         if self.do_deaccentification:
-            self.accents_dict = read_json(self.config["accent_file"])[lang]
+            self.accents_dict = read_json(os.path.join(util_data_dir,self.config["accent_file"]))[lang]
         self.debug = debug
 
     def perfrom_deaccentification(self,text):
