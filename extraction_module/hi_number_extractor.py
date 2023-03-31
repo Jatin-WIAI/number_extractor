@@ -1,46 +1,23 @@
-import json
-import pandas as pd
 import sys
 from word2number import w2n
-import json
 import re
-from num2words import num2words
 from collections import Counter
 import logging
+from extraction_module.utils import read_json,replace_all, create_number_array_from_text
+import numpy as np
 
-def read_json(file_name):
-    try:
-        with open(file_name,"r") as f:
-            data = json.load(f)
-    except:
-        logging.error("Error in reading the file "+file_name)
-    return data
-
-def replace_all(text,keywords,target):
-    """Replace keywords with target in the text.
-
-    Args:
-        text (_type_): Input text
-        keywords (_type_): Keywordsd to replace
-        target (_type_): string that replaces the keyword.
-
-    Returns:
-        _type_: replaced text
-    """
-    for key in keywords:
-        text = text.replace(key,target)
-    return text
-
-class NumberExtractor():
+class HINumberExtractor():
     """
     The Class which extracts number from a text
     """
     def __init__(self,lang, config_file, normalizer = None,use_translate=True, translation_model=None,debug=False):
+        self.supported_languages = ["hi","mr"]
+        assert lang in self.supported_languages, "Language not supported"
         self.lang = lang
         self.config = read_json(config_file)[lang]
         self.wh_num_dict = read_json(self.config["wh_num_dict_file"])
         self.frac_dict =  read_json(self.config["frac_key_dict_file"])
-        self.deci_dict = read_json(self.config["deci_key_dict_file"])
+        self.num_word_dict = read_json(self.config["num_word_dict_file"])
         self.en_num_dict = read_json(self.config["en_num_dict_file"])
         self.model = translation_model
         self.normalizer = normalizer
@@ -151,6 +128,58 @@ class NumberExtractor():
 
         return text
 
+
+    def extract_number_from_array(self,arr):
+        """Extract number from an array of numbers. 
+        If the array has only one element, return that element.
+        find the largest element position in the array. Multiply all the elements before that position and add all the elements after that position.
+
+        Args:
+            arr (List): List of numbers
+
+        Returns:
+            float: Extracted number
+        """
+
+        if len(arr)==2:
+            if arr[0]>arr[1]:
+                return arr[0]+arr[1]
+            else:
+                return arr[1]*arr[0]
+        if len(arr)==1:
+            return arr[0]
+        max_index = np.argmax(arr)
+        if max_index==0:
+            return arr[0]+self.extract_number_from_array(arr[1:])
+        elif max_index==len(arr)-1:
+            return arr[-1]*self.extract_number_from_array(arr[:-1])
+        else:
+            return arr[max_index]*self.extract_number_from_array(arr[:max_index])+self.extract_number_from_array(arr[max_index+1:])
+        
+    def extract_decimal_number_from_array(self,arr):
+        number_string = "".join([str(x) for x in arr])
+        number_string = "0."+number_string
+        return float(number_string)
+    
+    def compute(self,text):
+        """Compute the number from the text.
+
+        Args:
+            text (_type_): Input text after replacing the keywords
+
+        Returns:
+            Float: Extracted number
+        """
+        number_array, decimal_number_array = create_number_array_from_text(text)
+        number=0 ; decimal_number=0
+        if len(number_array)==0 and len(decimal_number_array)==0:
+            return -1
+        if len(number_array)>0:
+            number = self.extract_number_from_array(number_array)
+        if len(decimal_number_array)>0:
+            decimal_number = self.extract_decimal_number_from_array(decimal_number_array)
+        return number+decimal_number
+
     def postprocess_en_text(self,text):
         """Postprocessing step for english text.
 
@@ -212,7 +241,7 @@ class NumberExtractor():
 
 
     def extract_by_replace(self,text):
-        """Function perform extraction by replace. The first step is to replace keywords. Use deci_dict for this.
+        """Function perform extraction by replace. The first step is to replace keywords. Use num_word_dict for this.
 
 
         Args:
@@ -221,10 +250,10 @@ class NumberExtractor():
         Returns:
             _type_: _description_
         """
-        for k,v in self.deci_dict.items():
+        for k,v in self.num_word_dict.items():
             text = self.replace_keywords(text,v,k)
         # print(text)
-        number = self.extract_by_w2n(text)
+        number = self.compute(text)
         if self.debug:
             print("Replaced Text: ",text)
         return number
@@ -351,12 +380,12 @@ if __name__ == "__main__":
     sys.path.append("/home/jatin/indicTrans")
     from indicTrans.inference.engine import Model
     import indicnlp
-    indic2en_model = Model(expdir='/home/jatin/indicTrans/indic-en')
+    # indic2en_model = Model(expdir='/home/jatin/indicTrans/indic-en')
 
     normalizer = indicnlp.normalize.indic_normalize.DevanagariNormalizer()
     lang = "hi"
     # extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False)
-    extractor_obj = NumberExtractor(lang,"/home/jatin/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False,translation_model=indic2en_model,debug=True)
+    extractor_obj = HINumberExtractor(lang,"/home/jatin/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False,translation_model=None,debug=True)
     examples = {
         "hi":[
         "सौ एकर जमीन है",
@@ -383,7 +412,11 @@ if __name__ == "__main__":
         "ग्यारह सौ एकर जमीन है",
         "ढाई सो एकर जमीन",
         "ढाईसो एकर जमीन",
-        "मेरे परिवार में कुल बारा लोग है"
+        "मेरे परिवार में कुल बारा लोग है",
+        "दो लाख पंद्रह हजार छः सौ इक्कीस",
+        "सोलह करोड़ दो लाख पंद्रह हजार छः सौ इक्कीस",
+        "एक दशमलव तीन एकर जमीन है",
+        "दो दशमलव तीन चार"
     ],
     "mr":[
         "शंभर एकर जमीन",
