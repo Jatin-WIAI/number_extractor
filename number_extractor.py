@@ -1,3 +1,11 @@
+import os
+import sys
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(SCRIPT_DIR)
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+# print(SCRIPT_DIR)
+
 from indicnlp.normalize.indic_normalize import DevanagariNormalizer
 from extraction_module.hi_number_extractor import HINumberExtractor
 
@@ -18,8 +26,10 @@ class NumberExtractor():
             sys.path.append("/home/jatin/indicTrans")
             from indicTrans.inference.engine import Model
             self.translation_model = Model(expdir=translation_model_path)
+        self.config_file_path = os.path.join(SCRIPT_DIR,"configs/num_ext.json")
+        # print(self.config_file_path)
         if self.lang in ["hi","mr"]:
-            self.number_extractor = HINumberExtractor(lang,"../configs/num_ext.json",normalizer=self.normalizer,use_translate=use_translate,translation_model=self.translation_model,debug=debug)
+            self.number_extractor = HINumberExtractor(lang,self.config_file_path,normalizer=self.normalizer,use_translate=use_translate,translation_model=self.translation_model,debug=debug)
 
     def extract_number(self,text):
         return self.number_extractor.extract_number(text)
