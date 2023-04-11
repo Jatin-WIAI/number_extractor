@@ -33,3 +33,6 @@ class NumberExtractor():
 
     def extract_number(self,text):
         return self.number_extractor.extract_number(text)
+    
+    def extract_all_numbers_and_normalized_text(self,text):
+        return self.number_extractor.extract_all_numbers_and_normalized_text(text)

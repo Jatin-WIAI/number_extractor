@@ -1,34 +1,38 @@
 import sys
-from word2number import w2n
+# from word2number import w2n
 import re
 from collections import Counter
 import logging
 from extraction_module.utils import read_json,replace_all, create_number_array_from_text
 import numpy as np
 import os
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 sys.path.append(SCRIPT_DIR)
 util_data_dir = os.path.join(os.path.dirname(SCRIPT_DIR),"util_data")
+itn_dir = os.path.join(os.path.dirname(SCRIPT_DIR),"indic-ITN/src")
+sys.path.append(itn_dir)
+
+from inverse_text_normalization.hi.run_predict import inverse_normalize_numbers_in_text
+
 
 class HINumberExtractor():
     """
     The Class which extracts number from a text
     """
-    def __init__(self,lang, config_file, normalizer = None,use_translate=True, translation_model=None,debug=False):
+    def __init__(self,lang, config_file, normalizer = None, do_deaccentification = True,use_translate=True, translation_model=None,debug=False):
         self.supported_languages = ["hi","mr"]
         assert lang in self.supported_languages, "Language not supported"
         self.lang = lang
         self.config = read_json(config_file)[lang]
-        self.wh_num_dict = read_json(os.path.join(util_data_dir,self.config["wh_num_dict_file"]))
-        self.frac_dict =  read_json(os.path.join(util_data_dir,self.config["frac_key_dict_file"]))
-        self.num_word_dict = read_json(os.path.join(util_data_dir,self.config["num_word_dict_file"]))
-        self.en_num_dict = read_json(os.path.join(util_data_dir,self.config["en_num_dict_file"]))
+        # self.wh_num_dict = read_json(os.path.join(util_data_dir,self.config["wh_num_dict_file"]))
+        # self.frac_dict =  read_json(os.path.join(util_data_dir,self.config["frac_key_dict_file"]))
+        # self.num_word_dict = read_json(os.path.join(util_data_dir,self.config["num_word_dict_file"]))
+        # self.en_num_dict = read_json(os.path.join(util_data_dir,self.config["en_num_dict_file"]))
         self.model = translation_model
         self.normalizer = normalizer
         self.use_translate = use_translate
-        self.do_deaccentification = self.config["deaccentification"]
+        self.do_deaccentification = do_deaccentification
         if self.do_deaccentification:
             self.accents_dict = read_json(os.path.join(util_data_dir,self.config["accent_file"]))[lang]
         self.debug = debug
@@ -58,7 +62,7 @@ class HINumberExtractor():
         trans_text = self.model.translate_paragraph(text, self.lang, 'en')
         return trans_text
     
-    def normalize_text(self,text): 
+    def unicode_normalize_text(self,text): 
         """Unicode normalize the input text
 
         Args:
@@ -98,9 +102,7 @@ class HINumberExtractor():
         """
         temp = re.findall(r'[-+]?(?:\d*\.\d+|\d+)', s)
         res = list(map(float, temp))
-        if len(res)>0:
-            return res[0]
-        return -1
+        return res
     
     def spot_keyword(self,text,keywords):
         """Do string matching and spot keyword in text. If spotted return 1
@@ -293,7 +295,7 @@ class HINumberExtractor():
         """
 
         trans_text = self.translate(text).replace("1 / 2","one and half") 
-        trans_text = self.normalize_text(trans_text)
+        trans_text = self.unicode_normalize_text(trans_text)
         if self.debug:
             print(trans_text)
         output_dict = {}
@@ -327,55 +329,120 @@ class HINumberExtractor():
                         return max(output_dict["replace"],output_dict["translate"])
             else:
                 return max(output_dict["spot"],output_dict["replace"])
-        # if self.use_translate==True:
-        #     if output_dict["spot"].is_integer()!=True:
-        #         if (output_dict["spot"]*10)%5==0:
-        #             return output_dict["spot"]
-        #     if output_dict["replace"].is_integer()!=True:
-        #         return output_dict["replace"]
-        #     else:
-        #         if output_dict["translate"].is_integer()!=True:
-        #             return output_dict["translate"]
-        #         else:
-        #             L = [v for k,v in output_dict.items()]
-        #             most_common,num_most_common = Counter(L).most_common(1)[0]
-        #             if num_most_common>1 and most_common!=-1:
-        #                 return most_common
-        #             else:
-        #                 return max(output_dict["replace"],output_dict["translate"])
         
-        # else:
-        #     if output_dict["spot"].is_integer()!=True:
-        #         if (output_dict["spot"]*10)%5==0:
-        #             return output_dict["spot"]
-        #     if output_dict["replace"].is_integer()!=True:
-        #         return output_dict["replace"]
-        #     else:
-        #         return max(output_dict["spot"],output_dict["replace"])
-
-    def extract_number_main(self,text):
+    def get_numbers_list_and_normalized_text(self,text):
         text = text.lstrip().rstrip()
-        text = self.normalize_text(" "+text+" ")
+        text = self.unicode_normalize_text(text)
         output_dict = {}
-        output_dict["spot"], spot_type = self.extract_by_og_lang_spot(text)
-        output_dict["replace"] = float(self.extract_by_replace(text))
-        if self.use_translate==True:
-            output_dict["translate"] = float(self.extract_by_translate(text))
-        if self.debug:
-            print(output_dict)
-        output = self.final_combining_fn(output_dict, spot_type)
-        return output
+        try:
+            inverse_normalized_text = inverse_normalize_numbers_in_text([text])[0]
+            # print(inverse_normalized_text)
+        except:
+            inverse_normalized_text = text
+        # print
+        numbers_list = self.extract_numerics_from_string(inverse_normalized_text)
+
+        return numbers_list, inverse_normalized_text
+        # output_dict["spot"], spot_type = self.extract_by_og_lang_spot(text)
+        # output_dict["replace"] = float(self.extract_by_replace(text))
+        # if self.use_translate==True:
+        #     output_dict["translate"] = float(self.extract_by_translate(text))
+        # if self.debug:
+        #     print(output_dict)
+        # output = self.final_combining_fn(output_dict, spot_type)
+        # return output
 
     def extract_number(self,text):
-        output = self.extract_number_main(text)
+        """Function which perform number extraction. Returns the maximum of all the numbers extracted.
+        Args:
+            text (str): input text
+
+        Returns:
+            float: output number, -1 if not found.
+        """
+        output_list,_ = self.get_numbers_list_and_normalized_text(text)
+        output = -1
+        if len(output_list)>0:
+            for i in range(len(output_list)):
+                if "." in str(output_list[i]):
+                    if output<output_list[i]:
+                        output = output_list[i]
+            if output==-1:
+                output = max(output_list)
         if self.do_deaccentification:
             text = self.perfrom_deaccentification(text)
             # print(text)
-            output_2 = self.extract_number_main(text)
-            ouptut =  max(output,output_2)
+            output_list_2,_ = self.get_numbers_list_and_normalized_text(text)
+            output_2 = -1
+            if len(output_list_2)>0:
+                for i in range(len(output_list_2)):
+                    if "." in str(output_list_2[i]):
+                        output_2 = output_list_2[i]
+                        break
+                if output_2==-1:
+                    output_2 = max(output_list_2)
+            if output_2>output:
+                output = output_2
+                output_list = output_list_2
+        return output
+    
+    def extract_best_number_and_normalized_text(self,text):
+        output_list, normalized_text = self.get_numbers_list_and_normalized_text(text)
+        output = -1
+        if len(output_list)>0:
+            for i in range(len(output_list)):
+                if "." in str(output_list[i]):
+                    if output<output_list[i]:
+                        output = output_list[i]
+            if output==-1:
+                output = max(output_list)
+        if self.do_deaccentification:
+            text = self.perfrom_deaccentification(text)
+            output_list_2, normalized_text_2 =  self.get_numbers_list_and_normalized_text(text)
+            output_2 = -1
+            if len(output_list_2)>0:
+                for i in range(len(output_list_2)):
+                    if "." in str(output_list_2[i]):
+                        output_2 = output_list_2[i]
+                        break
+                if output_2==-1:
+                    output_2 = max(output_list_2)
+            if output_2>output:
+                output = output_2
+                output_list = output_list_2
+                normalized_text = normalized_text_2
+        return output, normalized_text
 
-        return ouptut
+    
+    def extract_all_numbers_and_normalized_text(self,text):
+        """Function which perform number extraction. Returns all the numbers extracted along with the normalized text.
 
+        Args:
+            text (str): input text
+        
+        Returns:
+            list: list of all the numbers extracted.
+        """
+        output_list, normalized_text = self.get_numbers_list_and_normalized_text(text)
+        return_list = []
+        return_list.append({
+            "original":{
+            "number_list": output_list,
+            "normalized_text": normalized_text,
+            "original_text": text
+            }
+        })
+        if self.do_deaccentification:
+            text = self.perfrom_deaccentification(text)
+            output_list_2, normalized_text =  self.get_numbers_list_and_normalized_text(text)
+            return_list.append({
+                        "deaccentified":{
+                        "number_list": output_list_2,
+                        "normalized_text": normalized_text,
+                        "original_text": text
+                        }
+                    })
+        return return_list
         # return (number_1,number_2,number_3)
 
 
