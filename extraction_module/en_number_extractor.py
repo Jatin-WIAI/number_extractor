@@ -13,71 +13,22 @@ util_data_dir = os.path.join(os.path.dirname(SCRIPT_DIR),"util_data")
 itn_dir = os.path.join(os.path.dirname(SCRIPT_DIR),"indic-ITN/src")
 sys.path.append(itn_dir)
 
-from inverse_text_normalization.hi.run_predict import inverse_normalize_numbers_in_text
-from en_number_extractor import ENNumberExtractor
+from inverse_text_normalization.en.run_predict import inverse_normalize_text
 
-class HINumberExtractor():
+
+class ENNumberExtractor():
     """
     The Class which extracts number from a text
     """
-    def __init__(self,lang, config_file, normalizer = None, do_deaccentification = True,use_translate=False, translation_model=None,debug=False):
-        self.supported_languages = ["hi","mr"]
+    def __init__(self,lang="en", config_file = None, normalizer = None, do_deaccentification = False,use_translate=False, translation_model=None,debug=False):
+        self.supported_languages = ["en"]
         assert lang in self.supported_languages, "Language not supported"
         self.lang = lang
-        self.config = read_json(config_file)[lang]
-        self.model = translation_model
-        self.normalizer = normalizer
-        self.use_translate = use_translate
         self.do_deaccentification = do_deaccentification
-        if self.do_deaccentification:
-            self.accents_dict = read_json(os.path.join(util_data_dir,self.config["accent_file"]))[lang]
-
-        if self.use_translate:
-            self.en_number_extractor = ENNumberExtractor()
-
+        self.use_translate = use_translate
         self.debug = debug
-
-    def perfrom_deaccentification(self,text):
-        """Remove accents from the input text.
-
-        Args:
-            text (_type_): Input string
-
-        Returns:
-            _type_: text with accents removed.
-        """
-        for k,v in self.accents_dict.items():
-            text = text.replace(k,v)
-        return text
-
-    def translate(self,text):
-        """Translate text to english.
-
-        Args:
-            text (_type_): Text to be translated
-
-        Returns:
-            _type_: translated text
-        """
-        trans_text = self.model.translate_paragraph(text, self.lang, 'en')
-        return trans_text
-    
-    def unicode_normalize_text(self,text): 
-        """Unicode normalize the input text
-
-        Args:
-            text (str): Input string
-
-        Returns:
-            str: Normalized text
-        """
-        if self.normalizer!=None:
-            unicode_normalized_text = self.normalizer.normalize(text)
-        else:
-            unicode_normalized_text = text
-            logging.warn("You have not provided normalizer, text will not be unicode normalized")
-        return unicode_normalized_text
-    
+        self.normalizer = normalizer
+        
     def extract_numerics_from_string(self,s):
         """Extract numerics from a string. It can be whole number or decimal.
         Args:
@@ -89,28 +40,13 @@ class HINumberExtractor():
         temp = re.findall(r'[-+]?(?:\d*\.\d+|\d+)', s)
         res = list(map(float, temp))
         return res
-
-    def extract_by_translate(self,text):
-        """Function which perform number extraction by translation. 
-
-        Args:
-            text (str): input text
-
-        Returns:
-            float: output number, -1 if not found.
-        """
-
-        trans_text = self.translate(text).replace("1 / 2","one and half") 
-        return self.en_number_extractor.extract_number(trans_text)
-        # print(number_1,number_2,number_3,number_4,number_5)
         
     def get_numbers_list_and_normalized_text(self,text):
         text = text.lstrip().rstrip()
-        text = self.unicode_normalize_text(text)
         output_dict = {}
         
         try:
-            inverse_normalized_text = inverse_normalize_numbers_in_text([text])[0]
+            inverse_normalized_text = inverse_normalize_text([text])[0]
             # print(inverse_normalized_text)
         except:
             inverse_normalized_text = text
@@ -229,7 +165,7 @@ if __name__ == "__main__":
     normalizer = indicnlp.normalize.indic_normalize.DevanagariNormalizer()
     lang = "hi"
     # extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False)
-    extractor_obj = HINumberExtractor(lang,"/home/jatin/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False,translation_model=None,debug=True)
+    extractor_obj = ENNumberExtractor(lang,"/home/jatin/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False,translation_model=None,debug=True)
     examples = {
         "hi":[
         "सौ एकर जमीन है",
