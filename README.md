@@ -1,4 +1,4 @@
-# Indic Text to Number Extractor
+# Indic Text to Number 
  
 Supported Languages:
 - Hindi (hi)
