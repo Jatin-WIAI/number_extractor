@@ -10,16 +10,17 @@ from indicnlp.normalize.indic_normalize import DevanagariNormalizer
 from extraction_module.hi_number_extractor import HINumberExtractor
 from extraction_module.en_number_extractor import ENNumberExtractor
 from extraction_module.mr_number_extractor import MRNumberExtractor
+from extraction_module.gu_number_extractor import GUNumberExtractor
 
 class NumberExtractor():
     def __init__(self, lang, use_translate = False, translation_model_path = "/home/jatin/indicTrans/indic-en",debug = False) -> None:
-        self.supported_langs = ["hi","en","mr"]
+        self.supported_langs = ["hi","en","mr","gu"]
         assert lang in self.supported_langs, "Language not supported"
         self.lang = lang
         self.use_translate = use_translate
         self.debug = debug
         self.translation_model = None
-        if lang in ["hi","mr"]:
+        if lang in ["hi","mr","gu"]:
             self.normalizer = DevanagariNormalizer()
         if use_translate:
             from fairseq import checkpoint_utils, distributed_utils, options, tasks, utils
@@ -38,7 +39,11 @@ class NumberExtractor():
 
         if self.lang in ["mr"]:
             self.number_extractor = MRNumberExtractor(lang,self.config_file_path,normalizer=self.normalizer,use_translate=use_translate,translation_model=self.translation_model,debug=debug)
-            
+
+        if self.lang in ["gu"]:
+            self.number_extractor = GUNumberExtractor(lang,self.config_file_path,normalizer=self.normalizer,use_translate=use_translate,translation_model=self.translation_model,debug=debug)
+
+
     def extract_number(self,text):
         """Function which perform number extraction. Returns the maximum of all the numbers extracted.
         Args:
