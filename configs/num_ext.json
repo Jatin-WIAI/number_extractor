@@ -14,5 +14,9 @@
         "en_num_dict_file": "en_keywords.json",
         "accent_file": "accents_list.json",
         "deaccentification": true
+    },
+    "gu":{
+        "accent_file": "accents_list.json",
+        "deaccentification": true
     }
 }
