@@ -3,7 +3,6 @@ import sys
 import re
 from collections import Counter
 import logging
-from extraction_module.utils import read_json,replace_all, create_number_array_from_text
 import numpy as np
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -13,6 +12,7 @@ util_data_dir = os.path.join(os.path.dirname(SCRIPT_DIR),"util_data")
 itn_dir = os.path.join(os.path.dirname(SCRIPT_DIR),"indic-ITN/src")
 sys.path.append(itn_dir)
 
+from extraction_module.utils import read_json,replace_all, create_number_array_from_text
 from inverse_text_normalization.hi.run_predict import inverse_normalize_numbers_in_text
 from en_number_extractor import ENNumberExtractor
 
@@ -218,11 +218,12 @@ class HINumberExtractor():
 
 
 if __name__ == "__main__":
-    from fairseq import checkpoint_utils, distributed_utils, options, tasks, utils
+    # from fairseq import checkpoint_utils, distributed_utils, options, tasks, utils
     import sys
     sys.path.append("/home/jatin/")
     sys.path.append("/home/jatin/indicTrans")
-    from indicTrans.inference.engine import Model
+    # from indicTrans.inference.engine import Model
+    from indicnlp.normalize.indic_normalize import DevanagariNormalizer
     import indicnlp
     # indic2en_model = Model(expdir='/home/jatin/indicTrans/indic-en')
 
@@ -261,37 +262,14 @@ if __name__ == "__main__":
         "सोलह करोड़ दो लाख पंद्रह हजार छः सौ इक्कीस",
         "एक दशमलव तीन एकर जमीन है",
         "दो दशमलव तीन चार"
-    ],
-    "mr":[
-        "शंभर एकर जमीन",
-        "पाचशे एकर जमीन",
-        "पाचशे एकर जमीन",
-        "पाचशे सात एकर जमीन",
-        "दीड एकर जमीन",
-        "एक पूर्णांक तीन एकर जमीन",
-        "501 एकर आहे",
-        "अर्धा एकर जमीन",
-        "दीड एकर जमीन",
-        "साडे सहा एकर जमीन",
-        "माझ्याकडे साडे दहा एकर जमीन आहे",
-        "निसलेशन म्हणजे चारशे सहा एकर जमीन",
-        "दोन हजार पाचशे तीस",
-        "पाचशे चाळीस एकर जमीन",
-        "माझ्याकडे 100 आणि 30 एकर जमीन आहे",
-        "त्रेपन्न",
-        "सत्तेचाळीस",
-        "दोन हजार पाचशे त्रेपन्न"
-    ]
-    }
+    ] }
     numbers = []
     for example in examples[lang]:
         print(example)
-        numbers.append(extractor_obj.extract_number(example))
+        numbers.append(extractor_obj.get_numbers_list_and_normalized_text(example))
         print("\n")
 
     print(numbers)
 
     ## सौ and सो
     ## साड़े and साढ़े
-
-    
