@@ -80,6 +80,9 @@ class NumberExtractor():
     
     def extract_best_number_and_normalized_text(self,text):
         output_list, normalized_text = self.number_extractor.get_numbers_list_and_normalized_text(text)
+        
+        '''
+        # Modified for multiple outputs.
         output = -1
         if len(output_list)>0:
             for i in range(len(output_list)):
@@ -88,9 +91,15 @@ class NumberExtractor():
                         output = output_list[i]
             if output==-1:
                 output = max(output_list)
+        '''
         if self.number_extractor.do_deaccentification:
             text = self.number_extractor.perfrom_deaccentification(text)
             output_list_2, normalized_text_2 =  self.number_extractor.get_numbers_list_and_normalized_text(text)
+            output_list = output_list_2
+            normalized_text = normalized_text_2
+            # print(output_list_2, normalized_text_2)
+            '''
+            # Modified for multiple outputs.
             output_2 = -1
             if len(output_list_2)>0:
                 for i in range(len(output_list_2)):
@@ -103,7 +112,9 @@ class NumberExtractor():
                 output = output_2
                 output_list = output_list_2
                 normalized_text = normalized_text_2
-        return output, normalized_text
+            '''
+        #return output, normalized_text
+        return output_list, normalized_text
     
     def extract_all_numbers_and_normalized_text(self,text):
         """Function which perform number extraction. Returns all the numbers extracted along with the normalized text.
@@ -134,3 +145,11 @@ class NumberExtractor():
                         }
                     })
         return return_list
+
+
+if __name__ == "__main__":
+    num_ext_obj = NumberExtractor("hi",use_translate=False,debug=False)
+
+    num_str = "पाँच सो रूपये और छः लीटर "
+    output, normalized_text = num_ext_obj.extract_best_number_and_normalized_text(num_str)
+    print(output, normalized_text)
