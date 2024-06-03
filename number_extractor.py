@@ -13,38 +13,40 @@ from extraction_module.mr_number_extractor import MRNumberExtractor
 from extraction_module.gu_number_extractor import GUNumberExtractor
 
 class NumberExtractor():
-    def __init__(self, lang, use_translate = False, translation_model_path = "/home/jatin/indicTrans/indic-en",debug = False) -> None:
+    def __init__(self, lang, translation_model_path = "/home/jatin/indicTrans/indic-en",debug = False) -> None:
         self.supported_langs = ["hi","en","mr","gu"]
         assert lang in self.supported_langs, "Language not supported"
         self.lang = lang
-        self.use_translate = use_translate
+        # self.use_translate = use_translate
         self.debug = debug
         self.translation_model = None
         self.normalizer = None
         if lang in ["hi","mr","gu"]:
             self.normalizer = DevanagariNormalizer()
-        if use_translate:
-            from fairseq import checkpoint_utils, distributed_utils, options, tasks, utils
-            import sys
-            sys.path.append("/home/jatin/")
-            sys.path.append("/home/jatin/indicTrans")
-            from indicTrans.inference.engine import Model
-            self.translation_model = Model(expdir=translation_model_path)
+        # if use_translate:
+        #     from fairseq import checkpoint_utils, distributed_utils, options, tasks, utils
+        #     import sys
+        #     sys.path.append("/home/jatin/")
+        #     sys.path.append("/home/jatin/indicTrans")
+        #     from indicTrans.inference.engine import Model
+        #     self.translation_model = Model(expdir=translation_model_path)
         self.config_file_path = os.path.join(SCRIPT_DIR,"configs/num_ext.json")
         # print(self.config_file_path)
         if self.lang in ["hi"]:
-            self.number_extractor = HINumberExtractor(lang,self.config_file_path,normalizer=self.normalizer,use_translate=use_translate,translation_model=self.translation_model,debug=debug)
+            self.number_extractor = HINumberExtractor(lang,self.config_file_path,normalizer=self.normalizer,translation_model=self.translation_model,debug=debug)
 
         if self.lang in ["en"]:
             self.number_extractor = ENNumberExtractor()
 
         if self.lang in ["mr"]:
-            self.number_extractor = MRNumberExtractor(lang,self.config_file_path,normalizer=self.normalizer,use_translate=use_translate,translation_model=self.translation_model,debug=debug)
+            self.number_extractor = MRNumberExtractor(lang,self.config_file_path,normalizer=self.normalizer,translation_model=self.translation_model,debug=debug)
 
         if self.lang in ["gu"]:
-            self.number_extractor = GUNumberExtractor(lang,self.config_file_path,normalizer=self.normalizer,use_translate=use_translate,translation_model=self.translation_model,debug=debug)
+            self.number_extractor = GUNumberExtractor(lang,self.config_file_path,normalizer=self.normalizer,translation_model=self.translation_model,debug=debug)
 
-
+        print("Initialising Number Extractor")
+        print(self.lang)
+        
     def extract_number(self,text):
         """Function which perform number extraction. Returns the maximum of all the numbers extracted.
         Args:

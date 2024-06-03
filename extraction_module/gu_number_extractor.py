@@ -21,20 +21,20 @@ class GUNumberExtractor():
     """
     The Class which extracts number from a text
     """
-    def __init__(self,lang, config_file, normalizer = None, do_deaccentification = True,use_translate=False, translation_model=None,debug=False):
+    def __init__(self,lang, config_file, normalizer = None, do_deaccentification = True, translation_model=None,debug=False):
         self.supported_languages = ["gu"]
         assert lang in self.supported_languages, "Language not supported"
         self.lang = lang
         self.config = read_json(config_file)[lang]
         self.model = translation_model
         self.normalizer = normalizer
-        self.use_translate = use_translate
+        # self.use_translate = use_translate
         self.do_deaccentification = do_deaccentification
         if self.do_deaccentification:
             self.accents_dict = read_json(os.path.join(util_data_dir,self.config["accent_file"]))[lang]
 
-        if self.use_translate:
-            self.en_number_extractor = ENNumberExtractor()
+        # if self.use_translate:
+        #     self.en_number_extractor = ENNumberExtractor()
 
         self.debug = debug
 
@@ -51,17 +51,17 @@ class GUNumberExtractor():
             text = text.replace(k,v)
         return text
 
-    def translate(self,text):
-        """Translate text to english.
+    # def translate(self,text):
+    #     """Translate text to english.
 
-        Args:
-            text (_type_): Text to be translated
+    #     Args:
+    #         text (_type_): Text to be translated
 
-        Returns:
-            _type_: translated text
-        """
-        trans_text = self.model.translate_paragraph(text, self.lang, 'en')
-        return trans_text
+    #     Returns:
+    #         _type_: translated text
+    #     """
+    #     trans_text = self.model.translate_paragraph(text, self.lang, 'en')
+    #     return trans_text
     
     def unicode_normalize_text(self,text): 
         """Unicode normalize the input text
@@ -91,19 +91,19 @@ class GUNumberExtractor():
         res = list(map(float, temp))
         return res
 
-    def extract_by_translate(self,text):
-        """Function which perform number extraction by translation. 
+    # def extract_by_translate(self,text):
+    #     """Function which perform number extraction by translation. 
 
-        Args:
-            text (str): input text
+    #     Args:
+    #         text (str): input text
 
-        Returns:
-            float: output number, -1 if not found.
-        """
+    #     Returns:
+    #         float: output number, -1 if not found.
+    #     """
 
-        trans_text = self.translate(text).replace("1 / 2","one and half") 
-        return self.en_number_extractor.extract_number(trans_text)
-        # print(number_1,number_2,number_3,number_4,number_5)
+    #     trans_text = self.translate(text).replace("1 / 2","one and half") 
+    #     return self.en_number_extractor.extract_number(trans_text)
+    #     # print(number_1,number_2,number_3,number_4,number_5)
         
     def get_numbers_list_and_normalized_text(self,text):
         text = text.lstrip().rstrip()
@@ -117,11 +117,11 @@ class GUNumberExtractor():
             inverse_normalized_text = text
         # print
         numbers_list = self.extract_numerics_from_string(inverse_normalized_text)
-        if len(numbers_list)==0 and self.use_translate==True:
-            number = self.extract_by_translate(text)
-            if number!=-1:
-                numbers_list.append(number)
-            inverse_normalized_text = text
+        # if len(numbers_list)==0 and self.use_translate==True:
+        #     number = self.extract_by_translate(text)
+        #     if number!=-1:
+        #         numbers_list.append(number)
+        #     inverse_normalized_text = text
         return numbers_list, inverse_normalized_text
 
     # def extract_number(self,text):

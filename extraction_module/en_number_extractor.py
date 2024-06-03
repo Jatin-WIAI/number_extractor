@@ -21,12 +21,12 @@ class ENNumberExtractor():
     """
     The Class which extracts number from a text
     """
-    def __init__(self,lang="en", config_file = None, normalizer = None, do_deaccentification = False,use_translate=False, translation_model=None,debug=False):
+    def __init__(self,lang="en", config_file = None, normalizer = None, do_deaccentification = False,translation_model=None,debug=False):
         self.supported_languages = ["en"]
         assert lang in self.supported_languages, "Language not supported"
         self.lang = lang
         self.do_deaccentification = do_deaccentification
-        self.use_translate = use_translate
+        # self.use_translate = use_translate
         self.debug = debug
         self.normalizer = normalizer
         
@@ -55,11 +55,11 @@ class ENNumberExtractor():
             inverse_normalized_text = text
         # print
         numbers_list = self.extract_numerics_from_string(inverse_normalized_text)
-        if len(numbers_list)==0 and self.use_translate==True:
-            number = self.extract_by_translate(text)
-            if number!=-1:
-                numbers_list.append(number)
-            inverse_normalized_text = text
+        # if len(numbers_list)==0 and self.use_translate==True:
+        #     number = self.extract_by_translate(text)
+        #     if number!=-1:
+        #         numbers_list.append(number)
+        #     inverse_normalized_text = text
         return numbers_list, inverse_normalized_text
 
     def extract_number(self,text):
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     normalizer = indicnlp.normalize.indic_normalize.DevanagariNormalizer()
     lang = "en"
     # extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False)
-    extractor_obj = ENNumberExtractor(lang,"/home/jatin/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False,translation_model=None,debug=True)
+    extractor_obj = ENNumberExtractor(lang,"/home/jatin/number_extractor/configs/num_ext.json",normalizer=normalizer,translation_model=None,debug=True)
     examples = {
         "en":[
             "it is two acres of one acre.",
