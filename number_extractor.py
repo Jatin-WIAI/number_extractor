@@ -20,6 +20,7 @@ class NumberExtractor():
         self.use_translate = use_translate
         self.debug = debug
         self.translation_model = None
+        self.normalizer = None
         if lang in ["hi","mr","gu"]:
             self.normalizer = DevanagariNormalizer()
         if use_translate:

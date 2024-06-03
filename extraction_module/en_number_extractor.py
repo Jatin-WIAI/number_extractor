@@ -3,7 +3,6 @@ import sys
 import re
 from collections import Counter
 import logging
-from extraction_module.utils import read_json,replace_all, create_number_array_from_text
 import numpy as np
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -13,7 +12,9 @@ util_data_dir = os.path.join(os.path.dirname(SCRIPT_DIR),"util_data")
 itn_dir = os.path.join(os.path.dirname(SCRIPT_DIR),"indic-ITN/src")
 sys.path.append(itn_dir)
 
+from extraction_module.utils import read_json,replace_all, create_number_array_from_text
 from inverse_text_normalization.en.run_predict import inverse_normalize_text
+# from en_number_extractor import ENNumberExtractor
 
 
 class ENNumberExtractor():
@@ -44,11 +45,13 @@ class ENNumberExtractor():
     def get_numbers_list_and_normalized_text(self,text):
         text = text.lstrip().rstrip()
         output_dict = {}
+        # print("text : ",text)
         
         try:
             inverse_normalized_text = inverse_normalize_text([text])[0]
-            # print(inverse_normalized_text)
-        except:
+            # print("inverse_normalize_text  : ",inverse_normalized_text)
+        except Exception as e:
+            print(f"Exception : {e} for text : {text}")
             inverse_normalized_text = text
         # print
         numbers_list = self.extract_numerics_from_string(inverse_normalized_text)
@@ -59,114 +62,141 @@ class ENNumberExtractor():
             inverse_normalized_text = text
         return numbers_list, inverse_normalized_text
 
-    # def extract_number(self,text):
-    #     """Function which perform number extraction. Returns the maximum of all the numbers extracted.
-    #     Args:
-    #         text (str): input text
+    def extract_number(self,text):
+        """Function which perform number extraction. Returns the maximum of all the numbers extracted.
+        Args:
+            text (str): input text
 
-    #     Returns:
-    #         float: output number, -1 if not found.
-    #     """
-    #     output_list,_ = self.get_numbers_list_and_normalized_text(text)
-    #     output = -1
-    #     if len(output_list)>0:
-    #         for i in range(len(output_list)):
-    #             if "." in str(output_list[i]):
-    #                 if output<output_list[i]:
-    #                     output = output_list[i]
-    #         if output==-1:
-    #             output = max(output_list)
-    #     if self.do_deaccentification:
-    #         text = self.perfrom_deaccentification(text)
-    #         # print(text)
-    #         output_list_2,_ = self.get_numbers_list_and_normalized_text(text)
-    #         output_2 = -1
-    #         if len(output_list_2)>0:
-    #             for i in range(len(output_list_2)):
-    #                 if "." in str(output_list_2[i]):
-    #                     output_2 = output_list_2[i]
-    #                     break
-    #             if output_2==-1:
-    #                 output_2 = max(output_list_2)
-    #         if output_2>output:
-    #             output = output_2
-    #             output_list = output_list_2
-    #     return output
+        Returns:
+            float: output number, -1 if not found.
+        """
+        output_list,_ = self.get_numbers_list_and_normalized_text(text)
+        output = -1
+        if len(output_list)>0:
+            for i in range(len(output_list)):
+                if "." in str(output_list[i]):
+                    if output<output_list[i]:
+                        output = output_list[i]
+            if output==-1:
+                output = max(output_list)
+        if self.do_deaccentification:
+            text = self.perfrom_deaccentification(text)
+            # print(text)
+            output_list_2,_ = self.get_numbers_list_and_normalized_text(text)
+            output_2 = -1
+            if len(output_list_2)>0:
+                for i in range(len(output_list_2)):
+                    if "." in str(output_list_2[i]):
+                        output_2 = output_list_2[i]
+                        break
+                if output_2==-1:
+                    output_2 = max(output_list_2)
+            if output_2>output:
+                output = output_2
+                output_list = output_list_2
+        return output
     
-    # def extract_best_number_and_normalized_text(self,text):
-    #     output_list, normalized_text = self.get_numbers_list_and_normalized_text(text)
-    #     output = -1
-    #     if len(output_list)>0:
-    #         for i in range(len(output_list)):
-    #             if "." in str(output_list[i]):
-    #                 if output<output_list[i]:
-    #                     output = output_list[i]
-    #         if output==-1:
-    #             output = max(output_list)
-    #     if self.do_deaccentification:
-    #         text = self.perfrom_deaccentification(text)
-    #         output_list_2, normalized_text_2 =  self.get_numbers_list_and_normalized_text(text)
-    #         output_2 = -1
-    #         if len(output_list_2)>0:
-    #             for i in range(len(output_list_2)):
-    #                 if "." in str(output_list_2[i]):
-    #                     output_2 = output_list_2[i]
-    #                     break
-    #             if output_2==-1:
-    #                 output_2 = max(output_list_2)
-    #         if output_2>output:
-    #             output = output_2
-    #             output_list = output_list_2
-    #             normalized_text = normalized_text_2
-    #     return output, normalized_text
+    def extract_best_number_and_normalized_text(self,text):
+        output_list, normalized_text = self.get_numbers_list_and_normalized_text(text)
+        output = -1
+        if len(output_list)>0:
+            for i in range(len(output_list)):
+                if "." in str(output_list[i]):
+                    if output<output_list[i]:
+                        output = output_list[i]
+            if output==-1:
+                output = max(output_list)
+        if self.do_deaccentification:
+            text = self.perfrom_deaccentification(text)
+            output_list_2, normalized_text_2 =  self.get_numbers_list_and_normalized_text(text)
+            output_2 = -1
+            if len(output_list_2)>0:
+                for i in range(len(output_list_2)):
+                    if "." in str(output_list_2[i]):
+                        output_2 = output_list_2[i]
+                        break
+                if output_2==-1:
+                    output_2 = max(output_list_2)
+            if output_2>output:
+                output = output_2
+                output_list = output_list_2
+                normalized_text = normalized_text_2
+        return output, normalized_text
 
     
-    # def extract_all_numbers_and_normalized_text(self,text):
-    #     """Function which perform number extraction. Returns all the numbers extracted along with the normalized text.
+    def extract_all_numbers_and_normalized_text(self,text):
+        """Function which perform number extraction. Returns all the numbers extracted along with the normalized text.
 
-    #     Args:
-    #         text (str): input text
+        Args:
+            text (str): input text
         
-    #     Returns:
-    #         list: list of all the numbers extracted.
-    #     """
-    #     output_list, normalized_text = self.get_numbers_list_and_normalized_text(text)
-    #     return_list = []
-    #     return_list.append({
-    #         "original":{
-    #         "number_list": output_list,
-    #         "normalized_text": normalized_text,
-    #         "original_text": text
-    #         }
-    #     })
-    #     if self.do_deaccentification:
-    #         text = self.perfrom_deaccentification(text)
-    #         output_list_2, normalized_text =  self.get_numbers_list_and_normalized_text(text)
-    #         return_list.append({
-    #                     "deaccentified":{
-    #                     "number_list": output_list_2,
-    #                     "normalized_text": normalized_text,
-    #                     "original_text": text
-    #                     }
-    #                 })
-    #     return return_list
-        # return (number_1,number_2,number_3)
+        Returns:
+            list: list of all the numbers extracted.
+        """
+        output_list, normalized_text = self.get_numbers_list_and_normalized_text(text)
+        return_list = []
+        return_list.append({
+            "original":{
+            "number_list": output_list,
+            "normalized_text": normalized_text,
+            "original_text": text
+            }
+        })
+        if self.do_deaccentification:
+            text = self.perfrom_deaccentification(text)
+            output_list_2, normalized_text =  self.get_numbers_list_and_normalized_text(text)
+            return_list.append({
+                        "deaccentified":{
+                        "number_list": output_list_2,
+                        "normalized_text": normalized_text,
+                        "original_text": text
+                        }
+                    })
+        return return_list
+        return (number_1,number_2,number_3)
 
 
 if __name__ == "__main__":
-    from fairseq import checkpoint_utils, distributed_utils, options, tasks, utils
-    import sys
-    sys.path.append("/home/jatin/")
-    sys.path.append("/home/jatin/indicTrans")
-    from indicTrans.inference.engine import Model
+    # from fairseq import checkpoint_utils, distributed_utils, options, tasks, utils
+    # import sys
+    # sys.path.append("/home/jatin/")
+    # sys.path.append("/home/jatin/indicTrans")
+    # from indicTrans.inference.engine import Model
+    from indicnlp.normalize.indic_normalize import DevanagariNormalizer
     import indicnlp
     # indic2en_model = Model(expdir='/home/jatin/indicTrans/indic-en')
 
     normalizer = indicnlp.normalize.indic_normalize.DevanagariNormalizer()
-    lang = "hi"
+    lang = "en"
     # extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False)
     extractor_obj = ENNumberExtractor(lang,"/home/jatin/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False,translation_model=None,debug=True)
     examples = {
+        "en":[
+            "it is two acres of one acre.",
+            "one hundred twenty",
+            "fifty five a half rupees per kg",
+            "there are two acres on",
+            "two quintals",
+            # "one",
+            # "three",
+            # "four",
+            # "two hundred",
+            # "two and half",
+            # "quarter",
+            # "ten and half",
+            # "two point five",
+            # "two fifty",
+            # "watered plan twice a day",
+            # "two hundred fifty liters",
+            # "Eight",
+            # "two hundred fifty",
+            # "twenty-five",
+            # "twenty-five hundred",
+            # "seventeen hundred",
+            # "hundred",
+            # "seventeenth date of april",
+            # "Priced at fifty-six hundred rupees per quintal"
+        ],
         "hi":[
         "सौ एकर जमीन है",
         "पाँच सौ एकर जमीन है",
@@ -219,10 +249,16 @@ if __name__ == "__main__":
         "दोन हजार पाचशे त्रेपन्न"
     ]
     }
+    # numbers = []
+    # for example in examples[lang]:
+    #     print(example)
+    #     numbers.append(extractor_obj.extract_number(example))
+    #     print("\n")
+
+    # print(numbers)
     numbers = []
     for example in examples[lang]:
-        print(example)
-        numbers.append(extractor_obj.extract_number(example))
+        numbers.append(extractor_obj.get_numbers_list_and_normalized_text(example))
         print("\n")
 
     print(numbers)

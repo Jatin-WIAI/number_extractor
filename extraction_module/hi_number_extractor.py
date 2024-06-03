@@ -219,9 +219,9 @@ class HINumberExtractor():
 
 if __name__ == "__main__":
     # from fairseq import checkpoint_utils, distributed_utils, options, tasks, utils
-    import sys
-    sys.path.append("/home/jatin/")
-    sys.path.append("/home/jatin/indicTrans")
+    # import sys
+    # sys.path.append("/home/jatin/")
+    # sys.path.append("/home/jatin/indicTrans")
     # from indicTrans.inference.engine import Model
     from indicnlp.normalize.indic_normalize import DevanagariNormalizer
     import indicnlp
@@ -230,7 +230,7 @@ if __name__ == "__main__":
     normalizer = indicnlp.normalize.indic_normalize.DevanagariNormalizer()
     lang = "hi"
     # extractor_obj = NumberExtractor("hi","/home/jatin/huggingface_demo/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False)
-    extractor_obj = HINumberExtractor(lang,"/home/jatin/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False,translation_model=None,debug=True)
+    extractor_obj = HINumberExtractor(lang,"/home/users/prayushif/data_backup/voice_survey_tool/git/voice_survey_tool/helper_modules/number_extractor/configs/num_ext.json",normalizer=normalizer,use_translate=False,translation_model=None,debug=True)
     examples = {
         "hi":[
         "सौ एकर जमीन है",
